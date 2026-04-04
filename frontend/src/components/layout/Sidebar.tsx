@@ -55,7 +55,7 @@ export default function Sidebar() {
               justifyContent: "center",
             }}
           >
-            <Activity size={16} color="#000" strokeWidth={2.5} />
+            <Activity size={16} color="#fff" strokeWidth={2.5} />
           </div>
           <span style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>Orka</span>
         </div>

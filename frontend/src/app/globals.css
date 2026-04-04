@@ -6,9 +6,9 @@
   --surface2:   #13141F;
   --border:     #1C1D2E;
   --border2:    #252640;
-  --green:      #00D37A;
-  --green-dim:  rgba(0, 211, 122, 0.10);
-  --green-glow: rgba(0, 211, 122, 0.20);
+  --green:      #7C3AED;
+  --green-dim:  rgba(124, 58, 237, 0.12);
+  --green-glow: rgba(124, 58, 237, 0.22);
   --red:        #FF4D6A;
   --red-dim:    rgba(255, 77, 106, 0.10);
   --yellow:     #FFB547;
@@ -49,8 +49,8 @@ body {
   cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap;
 }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-primary  { background: var(--green);  color: #000; }
-.btn-primary:hover:not(:disabled)  { background: #00f08c; }
+.btn-primary  { background: var(--green);  color: #fff; }
+.btn-primary:hover:not(:disabled)  { background: #6d28d9; }
 .btn-ghost    { background: transparent; color: var(--text2); border: 1px solid var(--border); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--border2); color: var(--text); background: var(--surface2); }
 .btn-danger   { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-dim); }

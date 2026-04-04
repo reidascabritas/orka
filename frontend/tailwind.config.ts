@@ -9,7 +9,7 @@ const config: Config = {
         surface: "#0E0F17",
         s2:      "#13141F",
         border:  "#1C1D2E",
-        green:   "#00D37A",
+        green:   "#7C3AED",
         red:     "#FF4D6A",
         yellow:  "#FFB547",
         blue:    "#4F8EF7",
