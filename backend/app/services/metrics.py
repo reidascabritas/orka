@@ -1,34 +1,45 @@
-from datetime import date, timedelta
+"""
+Métricas para o dashboard.
+Usa Order (populada pelo sync de integrações) como fonte principal de receita.
+Sale é usada para analytics granulares por produto quando disponível.
+"""
+from datetime import date, datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
-from app.models.sales import Sale
-from app.models.order import Order
+from app.models.order import Order, OrderItem
 from app.models.product import Product
 from app.models.metrics import Metric
 from app.models.ml import Anomaly
 import uuid
+import sqlalchemy as sa
+
+
+def _dt(d: date) -> datetime:
+    """Converte date para datetime UTC para comparar com DateTime columns."""
+    return datetime(d.year, d.month, d.day, tzinfo=timezone.utc)
 
 
 async def get_dashboard_summary(org_id: str, db: AsyncSession) -> dict:
     oid = uuid.UUID(org_id)
 
-    # Receita total (últimos 30 dias)
-    since = date.today() - timedelta(days=30)
+    # Receita dos últimos 30 dias (via Orders)
+    since      = _dt(date.today() - timedelta(days=30))
+    prev_since = _dt(date.today() - timedelta(days=60))
+
     rev_result = await db.execute(
-        select(func.sum(Sale.revenue)).where(
-            and_(Sale.organization_id == oid, Sale.date >= since)
+        select(func.sum(Order.total_amount)).where(
+            and_(Order.organization_id == oid, Order.date >= since)
         )
     )
     total_revenue = float(rev_result.scalar() or 0)
 
-    # Receita mês anterior (comparação)
-    prev_since = date.today() - timedelta(days=60)
+    # Receita período anterior (comparação)
     prev_rev = await db.execute(
-        select(func.sum(Sale.revenue)).where(
+        select(func.sum(Order.total_amount)).where(
             and_(
-                Sale.organization_id == oid,
-                Sale.date >= prev_since,
-                Sale.date < since,
+                Order.organization_id == oid,
+                Order.date >= prev_since,
+                Order.date < since,
             )
         )
     )
@@ -40,15 +51,12 @@ async def get_dashboard_summary(org_id: str, db: AsyncSession) -> dict:
     # Total de pedidos (últimos 30 dias)
     orders_result = await db.execute(
         select(func.count(Order.id)).where(
-            and_(
-                Order.organization_id == oid,
-                Order.date >= since,
-            )
+            and_(Order.organization_id == oid, Order.date >= since)
         )
     )
     total_orders = int(orders_result.scalar() or 0)
 
-    # Produtos ativos
+    # Produtos sincronizados
     products_result = await db.execute(
         select(func.count(Product.id)).where(Product.organization_id == oid)
     )
@@ -70,45 +78,81 @@ async def get_dashboard_summary(org_id: str, db: AsyncSession) -> dict:
 
 
 async def get_revenue_chart(org_id: str, days: int, db: AsyncSession) -> list[dict]:
+    """Gráfico de receita diária via Orders."""
     oid = uuid.UUID(org_id)
-    since = date.today() - timedelta(days=days)
+    since = _dt(date.today() - timedelta(days=days))
+
+    day_expr = func.cast(Order.date, sa.Date)
 
     result = await db.execute(
-        select(Sale.date, func.sum(Sale.revenue).label("revenue"))
-        .where(and_(Sale.organization_id == oid, Sale.date >= since))
-        .group_by(Sale.date)
-        .order_by(Sale.date)
+        select(
+            day_expr.label("day"),
+            func.sum(Order.total_amount).label("revenue"),
+        )
+        .where(and_(Order.organization_id == oid, Order.date >= since))
+        .group_by(day_expr)
+        .order_by(day_expr)
     )
     rows = result.all()
-    return [{"date": str(r.date), "revenue": float(r.revenue or 0)} for r in rows]
+    return [{"date": str(r.day), "revenue": float(r.revenue or 0)} for r in rows]
 
 
 async def get_top_products(org_id: str, limit: int, db: AsyncSession) -> list[dict]:
+    """
+    Top produtos por receita. Usa OrderItems se disponíveis,
+    caso contrário retorna lista vazia (até o ML ser executado).
+    """
     oid = uuid.UUID(org_id)
-    since = date.today() - timedelta(days=30)
+    since = _dt(date.today() - timedelta(days=30))
 
+    # Tenta via OrderItems + Product
     result = await db.execute(
         select(
             Product.id,
             Product.name,
-            func.sum(Sale.revenue).label("revenue"),
-            func.sum(Sale.units_sold).label("units"),
+            func.sum(OrderItem.price * OrderItem.quantity).label("revenue"),
+            func.sum(OrderItem.quantity).label("units"),
         )
-        .join(Sale, Sale.product_id == Product.id)
-        .where(and_(Sale.organization_id == oid, Sale.date >= since))
+        .join(OrderItem, OrderItem.product_id == Product.id)
+        .join(Order, Order.id == OrderItem.order_id)
+        .where(
+            and_(
+                Order.organization_id == oid,
+                Order.date >= since,
+            )
+        )
         .group_by(Product.id, Product.name)
-        .order_by(func.sum(Sale.revenue).desc())
+        .order_by(func.sum(OrderItem.price * OrderItem.quantity).desc())
         .limit(limit)
     )
     rows = result.all()
+
+    if rows:
+        return [
+            {
+                "product_id": str(r.id),
+                "name": r.name,
+                "revenue": float(r.revenue or 0),
+                "units_sold": float(r.units or 0),
+            }
+            for r in rows
+        ]
+
+    # Fallback: retorna produtos com maior n° de pedidos (sem breakdown)
+    result2 = await db.execute(
+        select(Product.id, Product.name)
+        .where(Product.organization_id == oid)
+        .limit(limit)
+    )
+    products = result2.all()
     return [
         {
-            "product_id": str(r.id),
-            "name": r.name,
-            "revenue": float(r.revenue or 0),
-            "units_sold": float(r.units or 0),
+            "product_id": str(p.id),
+            "name": p.name,
+            "revenue": 0.0,
+            "units_sold": 0.0,
         }
-        for r in rows
+        for p in products
     ]
 
 

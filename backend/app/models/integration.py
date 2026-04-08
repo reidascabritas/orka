@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, ForeignKey, DateTime, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 import uuid
 from app.db.base import Base
 
@@ -11,6 +11,7 @@ class Integration(Base):
     access_token = Column(Text)   # criptografado
     refresh_token = Column(Text)  # criptografado
     expires_at = Column(DateTime(timezone=True))
+    extra_data = Column(JSONB, nullable=True)  # shop domain, scopes, etc.
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class IntegrationSyncLog(Base):

@@ -1,13 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
-from app.db.base import get_db
-from app.core.deps import get_current_user, get_current_org_id
-from app.core.config import settings
-from app.models.user import User
-from app.models.integration import Integration, IntegrationSyncLog
-from app.services import integration as integration_service
 import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import RedirectResponse
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import settings
+from app.core.deps import get_current_org_id, get_current_user
+from app.db.base import get_db
+from app.models.integration import Integration, IntegrationSyncLog
+from app.models.user import User
+from app.services import integration as integration_service
 
 router = APIRouter()
 
@@ -39,8 +42,21 @@ async def get_sync_logs(
     integration_id: str,
     limit: int = Query(default=20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
+    org_id: str = Depends(get_current_org_id),
     db: AsyncSession = Depends(get_db),
 ):
+    oid = uuid.UUID(org_id)
+
+    # Ownership check: ensure the integration belongs to the user's org
+    integ_result = await db.execute(
+        select(Integration).where(
+            Integration.id == uuid.UUID(integration_id),
+            Integration.organization_id == oid,
+        )
+    )
+    if not integ_result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Integração não encontrada")
+
     result = await db.execute(
         select(IntegrationSyncLog)
         .where(IntegrationSyncLog.integration_id == uuid.UUID(integration_id))
@@ -50,12 +66,12 @@ async def get_sync_logs(
     logs = result.scalars().all()
     return [
         {
-            "id": str(l.id),
-            "status": l.status,
-            "message": l.message,
-            "last_sync_at": l.last_sync_at.isoformat() if l.last_sync_at else None,
+            "id": str(log.id),
+            "status": log.status,
+            "message": log.message,
+            "last_sync_at": log.last_sync_at.isoformat() if log.last_sync_at else None,
         }
-        for l in logs
+        for log in logs
     ]
 
 
@@ -116,10 +132,15 @@ async def connect_url(
 async def disconnect_integration(
     integration_id: str,
     current_user: User = Depends(get_current_user),
+    org_id: str = Depends(get_current_org_id),
     db: AsyncSession = Depends(get_db),
 ):
+    oid = uuid.UUID(org_id)
     result = await db.execute(
-        select(Integration).where(Integration.id == uuid.UUID(integration_id))
+        select(Integration).where(
+            Integration.id == uuid.UUID(integration_id),
+            Integration.organization_id == oid,
+        )
     )
     integ = result.scalar_one_or_none()
     if not integ:
@@ -134,6 +155,7 @@ async def disconnect_integration(
 @router.get("/mercadolivre/connect")
 async def connect_mercadolivre(
     current_user: User = Depends(get_current_user),
+    org_id: str = Depends(get_current_org_id),
 ):
     if not settings.ML_APP_ID:
         raise HTTPException(status_code=400, detail="ML_APP_ID não configurado no .env")
@@ -141,36 +163,156 @@ async def connect_mercadolivre(
         f"https://auth.mercadolivre.com.br/authorization"
         f"?response_type=code&client_id={settings.ML_APP_ID}"
         f"&redirect_uri={settings.ML_REDIRECT_URI}"
+        f"&state={org_id}"
     )
     return {"redirect_url": url}
+
+
+@router.post("/{integration_id}/sync")
+async def sync_integration(
+    integration_id: str,
+    current_user: User = Depends(get_current_user),
+    org_id: str = Depends(get_current_org_id),
+    db: AsyncSession = Depends(get_db),
+):
+    """Endpoint genérico de sync — detecta a plataforma automaticamente."""
+    oid = uuid.UUID(org_id)
+    result = await db.execute(
+        select(Integration).where(
+            Integration.id == uuid.UUID(integration_id),
+            Integration.organization_id == oid,
+        )
+    )
+    integ = result.scalar_one_or_none()
+    if not integ:
+        raise HTTPException(status_code=404, detail="Integração não encontrada")
+
+    if integ.platform == "mercado_livre":
+        return await integration_service.sync_mercadolivre(integration_id, db)
+    elif integ.platform == "shopify":
+        return await integration_service.sync_shopify(integration_id, db)
+    else:
+        return {"status": "skipped", "platform": integ.platform, "message": "Plataforma sem sync implementado"}
 
 
 @router.get("/mercadolivre/callback")
 async def mercadolivre_callback(
     code: str,
-    org_id: str = Depends(get_current_org_id),
+    state: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    return await integration_service.ml_exchange_code(code, org_id, db)
+    """
+    Callback OAuth do Mercado Livre.
+    O parâmetro 'state' contém o org_id passado na URL de autorização.
+    Não requer JWT porque vem diretamente do browser após redirecionamento.
+    """
+    if not state:
+        raise HTTPException(status_code=400, detail="Parâmetro 'state' (org_id) ausente no callback")
+
+    result = await integration_service.ml_exchange_code(code, state, db)
+    if "error" in result:
+        return RedirectResponse(
+            url=f"{settings.FRONTEND_URL}/integrations?error=ml_auth_failed"
+        )
+    return RedirectResponse(
+        url=f"{settings.FRONTEND_URL}/integrations?connected=mercado_livre"
+    )
 
 
 @router.post("/mercadolivre/{integration_id}/sync")
 async def sync_mercadolivre(
     integration_id: str,
     current_user: User = Depends(get_current_user),
+    org_id: str = Depends(get_current_org_id),
     db: AsyncSession = Depends(get_db),
 ):
+    oid = uuid.UUID(org_id)
+    # Ownership check
+    check = await db.execute(
+        select(Integration).where(
+            Integration.id == uuid.UUID(integration_id),
+            Integration.organization_id == oid,
+        )
+    )
+    if not check.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Integração não encontrada")
+
     return await integration_service.sync_mercadolivre(integration_id, db)
 
 
 # ── Shopify ──────────────────────────────────────────────────
 
+@router.get("/shopify/connect")
+async def connect_shopify(
+    shop: str,
+    current_user: User = Depends(get_current_user),
+    org_id: str = Depends(get_current_org_id),
+):
+    if not settings.SHOPIFY_CLIENT_ID:
+        raise HTTPException(400, "SHOPIFY_CLIENT_ID não configurado no .env")
+    from app.integrations.shopify.integration import ShopifyIntegration
+    url = ShopifyIntegration.get_auth_url(shop=shop, state=org_id)
+    return {"redirect_url": url}
+
+
+@router.get("/shopify/callback")
+async def shopify_callback(
+    code: str,
+    shop: str,
+    state: str | None = None,
+    hmac: str | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    from app.integrations.shopify.integration import ShopifyIntegration
+
+    try:
+        token_data = await ShopifyIntegration.exchange_code(shop=shop, code=code)
+        org_id = state or str(uuid.uuid4())
+
+        # Verifica se já existe integração para este shop
+        result = await db.execute(
+            select(Integration).where(
+                Integration.organization_id == uuid.UUID(org_id),
+                Integration.platform == "shopify",
+            )
+        )
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            existing.access_token = token_data["access_token"]
+            existing.extra_data = {"shop": shop, "scope": token_data.get("scope", "")}
+        else:
+            db.add(Integration(
+                organization_id=uuid.UUID(org_id),
+                platform="shopify",
+                access_token=token_data["access_token"],
+                extra_data={"shop": shop, "scope": token_data.get("scope", "")},
+            ))
+
+        await db.commit()
+        return RedirectResponse(url=f"{settings.FRONTEND_URL}/integrations?connected=shopify")
+    except Exception as e:
+        raise HTTPException(400, f"Erro no callback Shopify: {str(e)}")
+
+
 @router.post("/shopify/{integration_id}/sync")
 async def sync_shopify(
     integration_id: str,
     current_user: User = Depends(get_current_user),
+    org_id: str = Depends(get_current_org_id),
     db: AsyncSession = Depends(get_db),
 ):
+    oid = uuid.UUID(org_id)
+    # Ownership check
+    check = await db.execute(
+        select(Integration).where(
+            Integration.id == uuid.UUID(integration_id),
+            Integration.organization_id == oid,
+        )
+    )
+    if not check.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Integração não encontrada")
+
     return await integration_service.sync_shopify(integration_id, db)
 
 

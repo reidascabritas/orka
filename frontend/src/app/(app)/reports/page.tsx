@@ -100,7 +100,7 @@ export default function ReportsPage() {
                 padding: 16,
                 cursor: "pointer",
                 background: selected?.id === r.id ? "var(--surface2)" : "var(--surface)",
-                borderColor: selected?.id === r.id ? "rgba(0,211,122,0.3)" : "var(--border)",
+                borderColor: selected?.id === r.id ? "rgba(29,78,216,0.3)" : "var(--border)",
                 transition: "all 0.15s",
               }}
               onClick={() => selectReport(r.id)}

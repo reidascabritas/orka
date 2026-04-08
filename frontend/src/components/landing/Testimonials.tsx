@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 
 const TESTIMONIALS = [
   {
-    avatar: "#7C3AED",
+    avatar: "#1D4ED8",
     initials: "CS",
     name: "Carlos S.",
     role: "Loja de eletrônicos · Mercado Livre",
@@ -51,7 +51,7 @@ export default function Testimonials() {
                 {[1,2,3,4,5].map(i => <Star key={i} size={14} fill="#FFB547" color="#FFB547" />)}
               </div>
               <p style={{ fontSize: 14, color: "var(--lp-muted)", lineHeight: 1.8, marginBottom: 24, fontStyle: "italic" }}>
-                "{t.text}"
+                &ldquo;{t.text}&rdquo;
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{

@@ -49,19 +49,19 @@ export default function HowItWorks() {
           {/* connector */}
           <div style={{
             position: "absolute", top: 28, left: "18%", right: "18%", height: 1,
-            background: "linear-gradient(to right, transparent, rgba(124,58,237,0.4), rgba(59,130,246,0.4), transparent)",
+            background: "linear-gradient(to right, transparent, rgba(14,165,233,0.4), rgba(59,130,246,0.4), transparent)",
           }} />
 
-          {STEPS.map((s, i) => (
+          {STEPS.map((s) => (
             <div key={s.num} className="lp-card" style={{ padding: 32, textAlign: "center" }}>
               <div style={{
                 width: 56, height: 56, borderRadius: "50%",
-                border: "1px solid rgba(124,58,237,0.3)",
+                border: "1px solid rgba(14,165,233,0.3)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto 24px",
                 fontFamily: "var(--font-display)",
                 fontSize: 18, fontWeight: 700,
-                background: "linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.1))",
+                background: "linear-gradient(135deg, rgba(14,165,233,0.15), rgba(59,130,246,0.1))",
               }}>
                 <span className="lp-grad-text" style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 800 }}>
                   {s.num}

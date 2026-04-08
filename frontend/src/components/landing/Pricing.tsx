@@ -51,7 +51,7 @@ export default function Pricing() {
       <div style={{ maxWidth: 820, margin: "0 auto" }}>
         {/* Title */}
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: "var(--lp-purple)", marginBottom: 14 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: "var(--lp-cyan)", marginBottom: 14 }}>
             Pricing
           </p>
           <h2 style={{
@@ -66,7 +66,7 @@ export default function Pricing() {
           <div style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.05)", border: "1px solid var(--lp-border)", borderRadius: 99, padding: "6px 16px", marginTop: 8 }}>
             <button onClick={() => setAnnual(false)} style={{
               fontSize: 13, fontWeight: 500, border: "none", cursor: "pointer",
-              background: !annual ? "rgba(124,58,237,0.2)" : "transparent",
+              background: !annual ? "rgba(14,165,233,0.2)" : "transparent",
               color: !annual ? "#fff" : "var(--lp-muted)",
               borderRadius: 99, padding: "4px 14px", transition: "all 0.2s", fontFamily: "inherit",
             }}>
@@ -74,13 +74,13 @@ export default function Pricing() {
             </button>
             <button onClick={() => setAnnual(true)} style={{
               fontSize: 13, fontWeight: 500, border: "none", cursor: "pointer",
-              background: annual ? "rgba(124,58,237,0.2)" : "transparent",
+              background: annual ? "rgba(14,165,233,0.2)" : "transparent",
               color: annual ? "#fff" : "var(--lp-muted)",
               borderRadius: 99, padding: "4px 14px", transition: "all 0.2s", fontFamily: "inherit",
               display: "flex", alignItems: "center", gap: 6,
             }}>
               Anual
-              <span style={{ fontSize: 10, background: "rgba(34,197,94,0.15)", color: "#22C55E", borderRadius: 99, padding: "1px 6px", fontWeight: 600 }}>
+              <span style={{ fontSize: 10, background: "rgba(34,197,94,0.15)", color: "#14B8A6", borderRadius: 99, padding: "1px 6px", fontWeight: 600 }}>
                 -20%
               </span>
             </button>
@@ -97,13 +97,13 @@ export default function Pricing() {
                 style={{
                   position: "relative",
                   background: p.highlight
-                    ? "linear-gradient(var(--lp-s2), var(--lp-s2)) padding-box, linear-gradient(135deg, rgba(124,58,237,0.7), rgba(59,130,246,0.5)) border-box"
+                    ? "linear-gradient(var(--lp-s2), var(--lp-s2)) padding-box, linear-gradient(135deg, rgba(29,78,216,0.7), rgba(14,165,233,0.5)) border-box"
                     : "var(--lp-s2)",
                   border: "1px solid transparent",
                   borderRadius: 16,
                   padding: 32,
                   borderColor: p.highlight ? "transparent" : "var(--lp-border)",
-                  boxShadow: p.highlight ? "0 0 40px rgba(124,58,237,0.15)" : "none",
+                  boxShadow: p.highlight ? "0 0 40px rgba(14,165,233,0.15)" : "none",
                 }}
               >
                 {p.highlight && (
@@ -138,7 +138,7 @@ export default function Pricing() {
                     </p>
                   )}
                   {annual && p.annualPrice && (
-                    <p style={{ fontSize: 12, color: "#22C55E", marginTop: 4 }}>
+                    <p style={{ fontSize: 12, color: "#14B8A6", marginTop: 4 }}>
                       Cobrado anualmente — R$ {p.annualPrice * 12}/ano
                     </p>
                   )}
@@ -147,7 +147,7 @@ export default function Pricing() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
                   {p.features.map(f => (
                     <div key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <CheckCircle size={14} color={p.highlight ? "#7C3AED" : "#22C55E"} />
+                      <CheckCircle size={14} color={p.highlight ? "#0EA5E9" : "#14B8A6"} />
                       <span style={{ fontSize: 13, color: "var(--lp-muted)" }}>{f}</span>
                     </div>
                   ))}

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { GitBranch, ArrowLeft, GitCommit, Zap, Code2, Rocket } from "lucide-react";
+import { GitBranch, ArrowLeft, GitCommit, Code2, Rocket } from "lucide-react";
 
 const UPDATES = [
   {
     date: "Abr 2025",
     tag: "Launch",
-    color: "#7C3AED",
+    color: "#1D4ED8",
     title: "Landing page ao ar",
     desc: "Publicamos a landing page da Orka com design premium, seção de pricing e onboarding. Primeiro passo público do projeto.",
   },
@@ -93,14 +93,14 @@ export default function BuildInPublicPage() {
             style={{
               display: "inline-flex", alignItems: "center", gap: 10,
               fontSize: 14, fontWeight: 500, color: "#fff",
-              background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.35)",
+              background: "rgba(14,165,233,0.15)", border: "1px solid rgba(14,165,233,0.35)",
               borderRadius: 10, padding: "10px 18px", textDecoration: "none",
               transition: "all 0.2s",
             }}
           >
             <GitBranch size={16} />
             Ver código no GitHub
-            <span style={{ fontSize: 11, background: "rgba(124,58,237,0.2)", borderRadius: 6, padding: "2px 8px", color: "var(--lp-purple)" }}>
+            <span style={{ fontSize: 11, background: "rgba(14,165,233,0.2)", borderRadius: 6, padding: "2px 8px", color: "var(--lp-purple)" }}>
               reidascabritas/orka
             </span>
           </a>
@@ -123,7 +123,7 @@ export default function BuildInPublicPage() {
 
         {/* Manifesto */}
         <div style={{
-          background: "var(--lp-s2)", border: "1px solid rgba(124,58,237,0.2)",
+          background: "var(--lp-s2)", border: "1px solid rgba(14,165,233,0.2)",
           borderRadius: 16, padding: 32, marginBottom: 64,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
@@ -188,8 +188,8 @@ export default function BuildInPublicPage() {
 
         {/* What's next */}
         <div style={{
-          background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(59,130,246,0.06))",
-          border: "1px solid rgba(124,58,237,0.2)", borderRadius: 16, padding: 32, marginTop: 16,
+          background: "linear-gradient(135deg, rgba(14,165,233,0.08), rgba(59,130,246,0.06))",
+          border: "1px solid rgba(14,165,233,0.2)", borderRadius: 16, padding: 32, marginTop: 16,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
             <Code2 size={18} color="var(--lp-purple)" />

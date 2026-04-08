@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Zap, CheckCircle, XCircle, Clock, PlayCircle, RefreshCw } from "lucide-react";
+import { Zap, CheckCircle, XCircle, Clock, PlayCircle } from "lucide-react";
 import api from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Spinner from "@/components/ui/Spinner";
@@ -55,6 +55,7 @@ export default function DecisionsPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [filter]);
 
   const updateStatus = async (id: string, status: string) => {
@@ -100,7 +101,7 @@ export default function DecisionsPage() {
             style={{
               background: filter === v ? "var(--green-dim)" : "transparent",
               color: filter === v ? "var(--green)" : "var(--text2)",
-              border: `1px solid ${filter === v ? "rgba(0,211,122,0.3)" : "var(--border)"}`,
+              border: `1px solid ${filter === v ? "rgba(29,78,216,0.3)" : "var(--border)"}`,
             }}
           >
             {label}
@@ -114,7 +115,7 @@ export default function DecisionsPage() {
         <div className="card" style={{ padding: 60, textAlign: "center" }}>
           <Zap size={32} color="var(--text3)" style={{ margin: "0 auto 12px" }} />
           <p style={{ color: "var(--text2)", fontSize: 15, marginBottom: 4 }}>Nenhuma decisão encontrada</p>
-          <p style={{ color: "var(--text3)", fontSize: 13 }}>Clique em "Gerar decisões" para analisar seus dados</p>
+          <p style={{ color: "var(--text3)", fontSize: 13 }}>Clique em &ldquo;Gerar decisões&rdquo; para analisar seus dados</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

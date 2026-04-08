@@ -5,37 +5,37 @@ const FEATURES = [
     icon: Plug,
     title: "Conecte em 1 clique",
     desc: "Mercado Livre, Amazon, Shopify e mais. OAuth seguro, dados em tempo real sem configuração técnica.",
-    grad: "linear-gradient(135deg, #7C3AED, #3B82F6)",
+    grad: "linear-gradient(135deg, #1D4ED8, #0EA5E9)",
   },
   {
     icon: Brain,
     title: "IA que age por você",
     desc: "O sistema detecta oportunidades e problemas antes que você perceba. Recomendações prontas para executar.",
-    grad: "linear-gradient(135deg, #3B82F6, #06B6D4)",
+    grad: "linear-gradient(135deg, #0EA5E9, #14B8A6)",
   },
   {
     icon: BarChart2,
     title: "Visão cross-channel",
     desc: "Todos os seus canais de venda em um único painel inteligente. Receita, estoque e margens unificados.",
-    grad: "linear-gradient(135deg, #8B5CF6, #7C3AED)",
+    grad: "linear-gradient(135deg, #6366F1, #1D4ED8)",
   },
   {
     icon: Zap,
     title: "Decisões automáticas",
     desc: "Reabastecimento, ajuste de preço, promoções. A IA gera e você aprova com 1 clique.",
-    grad: "linear-gradient(135deg, #06B6D4, #3B82F6)",
+    grad: "linear-gradient(135deg, #0EA5E9, #1D4ED8)",
   },
   {
     icon: Bell,
     title: "Alertas inteligentes",
     desc: "Detecção de anomalias em tempo real. Receba alertas quando algo foge do padrão esperado.",
-    grad: "linear-gradient(135deg, #7C3AED, #8B5CF6)",
+    grad: "linear-gradient(135deg, #1D4ED8, #6366F1)",
   },
   {
     icon: TrendingUp,
     title: "Relatórios executivos",
     desc: "Gerados automaticamente toda semana. Resumo, problemas, oportunidades e plano de ação.",
-    grad: "linear-gradient(135deg, #3B82F6, #7C3AED)",
+    grad: "linear-gradient(135deg, #14B8A6, #0EA5E9)",
   },
 ];
 
@@ -51,14 +51,14 @@ export default function Features() {
       <div style={{
         position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)",
         width: 600, height: 400,
-        background: "radial-gradient(ellipse, rgba(124,58,237,0.06) 0%, transparent 70%)",
+        background: "radial-gradient(ellipse, rgba(14,165,233,0.06) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
       <div style={{ maxWidth: 1060, margin: "0 auto", position: "relative" }}>
         {/* Title */}
         <div style={{ textAlign: "center", marginBottom: 72 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: "var(--lp-purple)", marginBottom: 14 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: "var(--lp-cyan)", marginBottom: 14 }}>
             Funcionalidades
           </p>
           <h2 style={{
@@ -88,7 +88,7 @@ export default function Features() {
                 background: f.grad,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 marginBottom: 20,
-                boxShadow: "0 4px 20px rgba(124,58,237,0.25)",
+                boxShadow: "0 4px 20px rgba(14,165,233,0.25)",
               }}>
                 <f.icon size={20} color="#fff" />
               </div>

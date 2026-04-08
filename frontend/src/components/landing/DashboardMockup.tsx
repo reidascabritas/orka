@@ -15,7 +15,7 @@ export default function DashboardMockup() {
 
       <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative" }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: "var(--lp-purple)", marginBottom: 14 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: "var(--lp-cyan)", marginBottom: 14 }}>
             O produto
           </p>
           <h2 style={{
@@ -32,17 +32,17 @@ export default function DashboardMockup() {
           <div style={{
             position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)",
             width: "80%", height: "60%",
-            background: "radial-gradient(ellipse, rgba(124,58,237,0.2) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse, rgba(14,165,233,0.2) 0%, transparent 70%)",
             filter: "blur(30px)", pointerEvents: "none", zIndex: 0,
           }} />
 
           <div style={{
             position: "relative", zIndex: 1,
             background: "var(--lp-s2)",
-            border: "1px solid rgba(124,58,237,0.25)",
+            border: "1px solid rgba(14,165,233,0.25)",
             borderRadius: 16,
             overflow: "hidden",
-            boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,58,237,0.1)",
+            boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(14,165,233,0.1)",
           }}>
             {/* Browser bar */}
             <div style={{
@@ -71,7 +71,7 @@ export default function DashboardMockup() {
                   }}>
                     <p style={{ fontSize: 11, color: "var(--lp-muted2)", marginBottom: 6 }}>{m.label}</p>
                     <p style={{ fontSize: 20, fontWeight: 700, color: "var(--lp-text)", marginBottom: 4, fontFamily: "var(--font-display)" }}>{m.value}</p>
-                    <span style={{ fontSize: 11, fontWeight: 500, color: m.up ? "#7C3AED" : "#FFB547" }}>{m.sub}</span>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: m.up ? "#1D4ED8" : "#FFB547" }}>{m.sub}</span>
                   </div>
                 ))}
               </div>
@@ -83,12 +83,12 @@ export default function DashboardMockup() {
                   <svg viewBox="0 0 340 90" style={{ width: "100%", height: 90 }}>
                     <defs>
                       <linearGradient id="mock-grad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#7C3AED" stopOpacity="0.35" />
-                        <stop offset="100%" stopColor="#7C3AED" stopOpacity="0" />
+                        <stop offset="0%" stopColor="#1D4ED8" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor="#1D4ED8" stopOpacity="0" />
                       </linearGradient>
                     </defs>
                     <path d="M0,70 C40,65 60,40 90,42 S140,28 170,30 S230,15 270,18 L320,14 L340,12 L340,90 L0,90Z" fill="url(#mock-grad)" />
-                    <path d="M0,70 C40,65 60,40 90,42 S140,28 170,30 S230,15 270,18 L320,14 L340,12" fill="none" stroke="#7C3AED" strokeWidth="2" />
+                    <path d="M0,70 C40,65 60,40 90,42 S140,28 170,30 S230,15 270,18 L320,14 L340,12" fill="none" stroke="#1D4ED8" strokeWidth="2" />
                   </svg>
                 </div>
                 {/* Decisions */}
@@ -96,7 +96,7 @@ export default function DashboardMockup() {
                   <p style={{ fontSize: 12, fontWeight: 600, color: "var(--lp-muted)", marginBottom: 12 }}>Decisões pendentes</p>
                   {[
                     { text: "Repor estoque — Produto A", color: "#FF4D6A" },
-                    { text: "Promoção — Produto B",      color: "#7C3AED" },
+                    { text: "Promoção — Produto B",      color: "#1D4ED8" },
                     { text: "Ajustar preço — Produto C", color: "#FFB547" },
                   ].map((d) => (
                     <div key={d.text} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -112,12 +112,12 @@ export default function DashboardMockup() {
           {/* Floating badges */}
           <div style={{
             position: "absolute", top: "18%", right: -20,
-            background: "rgba(13,13,26,0.9)", border: "1px solid rgba(124,58,237,0.4)",
+            background: "rgba(13,13,26,0.9)", border: "1px solid rgba(14,165,233,0.4)",
             borderRadius: 10, padding: "10px 14px",
             backdropFilter: "blur(12px)", zIndex: 10,
             animation: "float 3s ease-in-out infinite",
           }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#7C3AED" }}>↑ 23% receita</p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#1D4ED8" }}>↑ 23% receita</p>
             <p style={{ fontSize: 11, color: "var(--lp-muted2)" }}>esta semana</p>
           </div>
           <div style={{

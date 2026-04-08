@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, update
+from sqlalchemy import select, and_
 from app.models.notification import Notification
 import uuid
 
@@ -32,7 +32,7 @@ async def list_notifications(org_id: str, user_id: str, unread_only: bool, db: A
         and_(Notification.organization_id == oid, Notification.user_id == uid)
     )
     if unread_only:
-        query = query.where(Notification.is_read == False)
+        query = query.where(Notification.is_read.is_(False))
     query = query.order_by(Notification.created_at.desc()).limit(50)
     result = await db.execute(query)
     return result.scalars().all()
@@ -58,7 +58,7 @@ async def mark_all_read(org_id: str, user_id: str, db: AsyncSession) -> int:
             and_(
                 Notification.organization_id == oid,
                 Notification.user_id == uid,
-                Notification.is_read == False,
+                Notification.is_read.is_(False),
             )
         )
     )

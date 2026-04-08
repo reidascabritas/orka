@@ -7,8 +7,7 @@ from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.integration import Integration, IntegrationSyncLog
-from app.models.order import Order, OrderItem
-from app.models.product import Product
+from app.models.order import Order
 from app.core.security import encrypt_token, decrypt_token
 from app.core.config import settings
 import uuid

@@ -36,6 +36,7 @@ export default function NotificationsPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [unreadOnly]);
 
   const markRead = async (id: string) => {
@@ -76,7 +77,7 @@ export default function NotificationsPage() {
             style={{
               background: unreadOnly === v ? "var(--green-dim)" : "transparent",
               color: unreadOnly === v ? "var(--green)" : "var(--text2)",
-              border: `1px solid ${unreadOnly === v ? "rgba(0,211,122,0.3)" : "var(--border)"}`,
+              border: `1px solid ${unreadOnly === v ? "rgba(29,78,216,0.3)" : "var(--border)"}`,
             }}
           >
             {label}

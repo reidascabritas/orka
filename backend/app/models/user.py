@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, ForeignKey, Enum, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 import uuid
 from app.db.base import Base
 
@@ -9,6 +8,11 @@ class Organization(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Assinatura / plano
+    plan = Column(String, default="starter")         # starter | pro | scale
+    plan_status = Column(String, default="trial")    # trial | active | cancelled | expired
+    abacatepay_billing_id = Column(String, nullable=True)
+    plan_expires_at = Column(DateTime(timezone=True), nullable=True)
 
 class User(Base):
     __tablename__ = "users"

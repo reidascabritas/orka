@@ -1,18 +1,30 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
-from pydantic import BaseModel
-from app.db.base import get_db
-from app.core.deps import get_current_user, get_current_org_id
-from app.models.user import User
-from app.models.decision import Decision, DecisionLog
-from app.services import decision as decision_service
 import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.audit import log_event
+from app.core.deps import get_current_org_id, get_current_user
+from app.db.base import get_db
+from app.models.decision import Decision, DecisionLog
+from app.models.user import User
+from app.services import decision as decision_service
 
 router = APIRouter()
 
 
+def _get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
 class StatusUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     status: str  # pendente | aprovado | executado | ignorado
 
 
@@ -86,11 +98,11 @@ async def get_decision(
         "created_at": d.created_at.isoformat() if d.created_at else None,
         "logs": [
             {
-                "action": l.action_taken,
-                "result": l.result,
-                "executed_at": l.executed_at.isoformat() if l.executed_at else None,
+                "action": log.action_taken,
+                "result": log.result,
+                "executed_at": log.executed_at.isoformat() if log.executed_at else None,
             }
-            for l in logs
+            for log in logs
         ],
     }
 
@@ -99,17 +111,48 @@ async def get_decision(
 async def update_status(
     decision_id: str,
     body: StatusUpdate,
+    request: Request,
     current_user: User = Depends(get_current_user),
     org_id: str = Depends(get_current_org_id),
     db: AsyncSession = Depends(get_db),
 ):
+    ip = _get_client_ip(request)
     valid = {"pendente", "aprovado", "executado", "ignorado"}
     if body.status not in valid:
         raise HTTPException(status_code=400, detail=f"Status inválido. Use: {valid}")
 
+    # Ownership check: ensure this decision belongs to the user's org
+    ownership = await db.execute(
+        select(Decision).where(
+            and_(
+                Decision.id == uuid.UUID(decision_id),
+                Decision.organization_id == uuid.UUID(org_id),
+            )
+        )
+    )
+    if not ownership.scalar_one_or_none():
+        log_event(
+            "decision.status_update",
+            str(current_user.id),
+            org_id,
+            ip,
+            "failure",
+            {"decision_id": decision_id, "reason": "not_found_or_unauthorized"},
+        )
+        raise HTTPException(status_code=404, detail="Decisão não encontrada")
+
     result = await decision_service.update_decision_status(decision_id, body.status, db)
     if not result:
         raise HTTPException(status_code=404, detail="Decisão não encontrada")
+
+    log_event(
+        "decision.status_update",
+        str(current_user.id),
+        org_id,
+        ip,
+        "success",
+        {"decision_id": decision_id, "new_status": body.status},
+    )
     return result
 
 

@@ -1,19 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
-from pydantic import BaseModel
-from app.db.base import get_db
-from app.core.deps import get_current_user, get_current_org_id
-from app.models.user import User
-from app.models.report import Report, ReportItem
-from app.services import report as report_service
 import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.deps import get_current_org_id, get_current_user
+from app.db.base import get_db
+from app.models.report import Report, ReportItem
+from app.models.user import User
+from app.services import report as report_service
 
 router = APIRouter()
 
 
 class GenerateReportRequest(BaseModel):
-    type: str = "mensal"  # mensal | semanal
+    model_config = ConfigDict(extra="forbid")
+
+    type: str = Field(default="mensal", max_length=20)  # mensal | semanal
 
 
 @router.get("/")
@@ -49,6 +53,7 @@ async def get_report(
     org_id: str = Depends(get_current_org_id),
     db: AsyncSession = Depends(get_db),
 ):
+    # Ownership check: filter by both report_id and org_id
     result = await db.execute(
         select(Report).where(
             and_(Report.id == uuid.UUID(report_id), Report.organization_id == uuid.UUID(org_id))
